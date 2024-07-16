@@ -9,19 +9,28 @@ import {
   Alert,
   Text,
 } from 'react-native';
-import React, {
-  useEffect,
-  useState,
-  useCallback,
-  useRef,
-  useDeferredValue,
-} from 'react';
+import React, {useEffect, useState, useCallback} from 'react';
 import data, {ItemData} from '../Constants/data';
 import Item from '../Components/Item';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import EncryptedStorage from 'react-native-encrypted-storage';
+import {useDispatch} from 'react-redux';
+import {AppDispatch, useAppSelector} from '../Redux/Store/store';
+import {MainParallelogram} from '../Screens/parallelogram';
+import Header from '../Components/Molecules/Header';
+import {
+  setSearch,
+  fetchSearchResults,
+  SearchResults,
+} from '../Redux/Slice/slice';
 
 const FlatListScreeen = () => {
+  const dispatch = useDispatch<AppDispatch>();
+  const search = useAppSelector(state => state.user.Search);
+  const status = useAppSelector(state => state.user.status);
+  const error = useAppSelector(state => state.user.error);
+  const searchResults = useAppSelector(state => state.user.searchResults);
   const [selectedId, setSelectedId] = useState<string>();
   const [refreshing, setRefreshing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -32,12 +41,18 @@ const FlatListScreeen = () => {
   useEffect(() => {
     const debounceTimer = setTimeout(() => {
       setSearchText(searchTerm);
+      updateLocalVariable(searchTerm);
     }, 500);
 
     return () => {
       clearTimeout(debounceTimer);
     };
   }, [searchTerm]);
+  useEffect(() => {
+    if (searchResults) {
+      console.log('Search Results:', searchResults);
+    }
+  }, [searchResults]);
 
   useEffect(() => {
     const backAction = () => {
@@ -68,15 +83,17 @@ const FlatListScreeen = () => {
     }, 2000);
   }, []);
 
-  const onPressFunction = (id: string) => {
-    setSelectedId(id);
-  };
+  // const onPressFunction = (id: string) => {
+  //   setSelectedId(id);
+  // };
 
   const handleInputChange = async (text: string) => {
     setSearchTerm(text);
+  };
+  const updateLocalVariable = async (value: string) => {
     await EncryptedStorage.setItem(
       'searcedText',
-      searchText,
+      value,
       // JSON.stringify({
       //   age: 21,
       //   token: 'ACCESS_TOKEN',
@@ -85,8 +102,15 @@ const FlatListScreeen = () => {
       // }),
     );
 
-    // setInputValue(input);
+    dispatch(setSearch(value));
+    dispatch(fetchSearchResults(value));
   };
+
+  useEffect(() => {
+    if (search) {
+      dispatch(fetchSearchResults(search));
+    }
+  }, [dispatch, search]);
 
   // For showing Loader while pagination
   const ListEndLoader = () => {
@@ -114,21 +138,32 @@ const FlatListScreeen = () => {
     }, 2000);
   };
 
-  const renderItem = ({item}: {item: ItemData}) => {
-    const backgroundColor = item.id === selectedId ? '#6e3b6e' : '#fff';
+  const renderItem = ({item}: {item: SearchResults}) => {
+    const backgroundColor =
+      item.id.toString() === selectedId ? '#6e3b6e' : '#fff';
     return (
       <Item
         item={item}
         backgroundColor={backgroundColor}
         textColor={'#000'}
+        categoryColor={'#7393B3'}
         borderColor={'#F0FFFF'}
-        onPress={() => onPressFunction(item.id)}
+        // onPress={() => onPressFunction(item.id?.toString())}
+        details={item}
       />
     );
   };
 
+  const getItemLayout = (_data: any, index: number) => ({
+    length: 130,
+    offset: 130 * index,
+    index,
+  });
+
   return (
     <View style={[FlatListStyle.parentContainer]}>
+      <Header title='Flat List'/>
+      {/* <MainParallelogram /> */}
       <View style={[FlatListStyle.searchContainer]}>
         <AntDesign name="search1" size={20} color={'#7393B3'} />
         <TextInput
@@ -138,22 +173,30 @@ const FlatListScreeen = () => {
           onChangeText={e => handleInputChange(e)}
         />
       </View>
-      {searchText ? (
-        <Text style={[FlatListStyle.serchResponse]}>{searchText}</Text>
-      ) : null}
-
-      <FlatList
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-        data={dataList}
-        renderItem={renderItem}
-        keyExtractor={item => item.id}
-        extraData={selectedId}
-        onEndReached={loadMore}
-        onEndReachedThreshold={0.1}
-        ListFooterComponent={ListEndLoader}
-      />
+      {status === 'loading' ? (
+        <ActivityIndicator />
+      ) : searchResults.length ? (
+        <FlatList
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+          data={searchResults}
+          renderItem={renderItem}
+          keyExtractor={item => item.id?.toString()}
+          extraData={selectedId}
+          onEndReached={loadMore}
+          onEndReachedThreshold={0.1}
+          ListFooterComponent={ListEndLoader}
+          getItemLayout={getItemLayout}
+        />
+      ) : (
+        <View style={[FlatListStyle.EmptyList]}>
+          <Ionicons name="list" size={50} color={'#7393B3'} />
+          <Text style={[FlatListStyle.nullItem]}>
+            {error ? error : 'NO ITEM FOUND'}
+          </Text>
+        </View>
+      )}
     </View>
   );
 };
@@ -161,6 +204,15 @@ const FlatListScreeen = () => {
 export default FlatListScreeen;
 
 const FlatListStyle = StyleSheet.create({
+  EmptyList: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  nullItem: {
+    color: '#7393B3',
+    fontSize: 18,
+  },
   serchResponse: {
     color: '#000',
     alignSelf: 'center',
@@ -180,7 +232,6 @@ const FlatListStyle = StyleSheet.create({
   },
   parentContainer: {
     flex: 1,
-    // backgroundColor: '#fff',
   },
   searchField: {
     paddingHorizontal: 15,

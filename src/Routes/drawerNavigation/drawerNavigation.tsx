@@ -1,22 +1,22 @@
+import React from 'react';
 import {createDrawerNavigator} from '@react-navigation/drawer';
-import MainRoutes from '../mainNavigation/mainNavigation';
-import MainScreen from '../../Screens/mainScreen';
-import FlatListScreeen from '../../Screens/flatList';
+import {TabRoutes} from '../TabNavigation/tabNavigation';
+import {FlatlistNavigationRoutes} from './stackNavigationDrawer';
 
 const Drawer = createDrawerNavigator();
 
 const DrawerNavigation = () => {
   return (
-    <Drawer.Navigator initialRouteName="Home">
+    <Drawer.Navigator initialRouteName="TabHome">
       <Drawer.Screen
-        name="Home"
-        component={MainScreen}
-        // options={{title: ''}}
+        name="TabHome"
+        component={TabRoutes}
+        options={{headerShown: false}}
       />
       <Drawer.Screen
         name="Flat List"
-        component={FlatListScreeen}
-        // options={{headerShown: false}}
+        component={FlatlistNavigationRoutes}
+        options={{headerShown: false}}
       />
     </Drawer.Navigator>
   );

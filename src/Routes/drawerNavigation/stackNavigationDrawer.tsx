@@ -1,19 +1,31 @@
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import MainScreen from '../../Screens/mainScreen';
+import FlatListScreeen from '../../Screens/flatList';
 import ItemDetails from '../../Screens/subScreens/ItemDetails';
 
 const Stack = createNativeStackNavigator();
 
-const MainRoutes = () => {
+const HomeNavigationRoutes = () => {
   return (
     <Stack.Navigator>
       <Stack.Screen
-        name="Home"
+        name="MainHome"
         component={MainScreen}
         options={{headerShown: false}}
       />
+    </Stack.Navigator>
+  );
+};
+const FlatlistNavigationRoutes = () => {
+  return (
+    <Stack.Navigator>
       <Stack.Screen
-        name="Details"
+        name="Main Flat List"
+        component={FlatListScreeen}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="Item Details"
         component={ItemDetails}
         options={{headerShown: false}}
       />
@@ -21,4 +33,4 @@ const MainRoutes = () => {
   );
 };
 
-export default MainRoutes;
+export {HomeNavigationRoutes, FlatlistNavigationRoutes};

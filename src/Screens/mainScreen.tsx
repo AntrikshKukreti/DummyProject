@@ -3,6 +3,7 @@ import {BackHandler, StyleSheet, View} from 'react-native';
 import VideoPlayer from '../Components/videoPlayer';
 import MapScreen from '../Components/mapScreen';
 import EncryptedStorage from 'react-native-encrypted-storage';
+import Header from '../Components/Molecules/Header';
 
 const MainScreen = () => {
   useEffect(() => {
@@ -17,13 +18,12 @@ const MainScreen = () => {
   }, []);
 
   const consoleFunction = async () => {
-    console.log("LLLL")
     const text = await EncryptedStorage.getItem('searcedText');
-    console.log(text, 'CHECKING DATA');
   };
 
   return (
     <View style={styles.container}>
+      <Header title="Home" />
       <VideoPlayer
         source={{
           uri: 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',

@@ -1,24 +1,29 @@
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import MainScreen from '../../Screens/mainScreen';
-import ItemDetails from '../../Screens/subScreens/ItemDetails';
-
+import Test from '../../Screens/test';
 const Stack = createNativeStackNavigator();
 
-const MainRoutes = () => {
+const StackNavigationRoutes = () => {
   return (
     <Stack.Navigator>
       <Stack.Screen
-        name="Home"
+        name="MainHome"
         component={MainScreen}
         options={{headerShown: false}}
       />
+    </Stack.Navigator>
+  );
+};
+const SecondRoutes = () => {
+  return (
+    <Stack.Navigator>
       <Stack.Screen
-        name="Details"
-        component={ItemDetails}
+        name="Screen"
+        component={Test}
         options={{headerShown: false}}
       />
     </Stack.Navigator>
   );
 };
 
-export default MainRoutes;
+export {StackNavigationRoutes, SecondRoutes};
